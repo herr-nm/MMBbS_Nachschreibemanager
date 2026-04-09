@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Max Mustermann",
+        "teacher": "NN",
+        "schoolClass": "KSM25Z",
+        "email": "mustermann.max@example.com",
+        "examName": "LF2T",
+        "makeUpDate": "2026-05-06T17:00",
+        "hasAU": false,
+        "id": "4c4980db-1b87-45e2-8cd9-860613575a58",
+        "status": "pending",
+        "duration": "30"
+    }
+]

@@ -1,0 +1,11 @@
+[[{
+    "vorname": "Max",
+    "nachname": "Mustermann",
+    "e-mail-adresse": "mustermann.max@example.com",
+    "gruppen": "KSM24Z Globale Gruppe"
+},{
+    "vorname": "Maria",
+    "nachname": "Musterfrau",
+    "e-mail-adresse": "musterfrau.maria@example.com",
+    "gruppen": "KSM24Z Globale Gruppe"
+}]]
