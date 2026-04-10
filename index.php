@@ -35,14 +35,11 @@ if (is_dir($classFolder)) {
     foreach ($files as $file) {
         $content = json_decode(file_get_contents($file), true);
         if (is_array($content)) {
-            // Moodle-Struktur: Entweder direktes Array oder verschachtelt [[...]]
             $data = (isset($content[0]) && is_array($content[0]) && isset($content[0][0])) ? $content[0] : $content;
             foreach ($data as $student) {
                 if (isset($student['vorname'])) {
-                    // Klassennamen bereinigen: Alles nach dem ersten Leerzeichen entfernen
                     $fullClass = $student['gruppen'] ?? '';
                     $cleanClass = !empty($fullClass) ? explode(' ', trim($fullClass))[0] : '';
-
                     $suggestions[] = [
                         'name' => $student['vorname'] . ' ' . $student['nachname'],
                         'email' => $student['e-mail-adresse'] ?? '',
@@ -54,7 +51,6 @@ if (is_dir($classFolder)) {
     }
 }
 
-// Speichern & Backup Logik
 if (isset($_GET['action']) && $_GET['action'] === 'save') {
     file_put_contents($storageFile, file_get_contents('php://input'));
     exit;
@@ -115,6 +111,8 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                             <input type="datetime-local" id="inputDate" required class="w-full px-4 py-2 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500">
                             <input type="email" id="inputEmail" class="w-full px-4 py-2 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500" placeholder="E-Mail (für Einladung)">
                             
+                            <textarea id="inputComment" class="w-full px-4 py-2 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Bemerkung (z.B. Raum, Hilfsmittel...)" rows="2"></textarea>
+                            
                             <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
                                 <input type="checkbox" id="inputAU" class="w-5 h-5 rounded text-blue-600">
                                 <label for="inputAU" class="text-sm font-medium text-slate-700 cursor-pointer">AU liegt vor</label>
@@ -137,21 +135,15 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
         </div>
     </div>
 
-	<footer class="mt-12 pb-8 text-center text-slate-500 text-sm">
-		<div class="max-w-6xl mx-auto border-t border-slate-200 pt-6 px-4">
-			<p class="mb-2">Nachschreibe-Manager &copy; 2026 by Herr-NM</p>
-			<div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
-				<span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded font-mono text-xs">CC BY-NC-SA 4.0</span>
-				<p>
-					Der ursprüngliche Code steht unter <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.de" target="_blank" class="underline hover:text-blue-600">CC BY-NC 4.0</a>, 
-					Urheber: Herr-FR.
-				</p>
-			</div>
-			<p class="mt-2">
-				Meine Änderungen stehen unter <span class="font-medium text-slate-700">CC BY-NC-SA 4.0</span>.
-			</p>
-		</div>
-	</footer>
+    <footer class="mt-12 pb-8 text-center text-slate-500 text-sm">
+        <div class="max-w-6xl mx-auto border-t border-slate-200 pt-6 px-4 text-center">
+            <p class="mb-2">Nachschreibe-Manager &copy; 2026 by Herr-NM</p>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
+                <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded font-mono text-xs">CC BY-NC-SA 4.0</span>
+                <p>Der ursprüngliche Code steht unter <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.de" target="_blank" class="underline hover:text-blue-600">CC BY-NC 4.0</a>, Urheber: Herr-FR.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
         let records = <?php echo $currentData; ?>;
@@ -165,9 +157,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
             const val = e.target.value.toLowerCase();
             suggestionBox.innerHTML = '';
             if (val.length < 2) { suggestionBox.classList.add('hidden'); return; }
-
             const matches = studentSuggestions.filter(s => s.name.toLowerCase().includes(val)).slice(0, 5);
-            
             if (matches.length > 0) {
                 matches.forEach(s => {
                     const div = document.createElement('div');
@@ -182,9 +172,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                     suggestionBox.appendChild(div);
                 });
                 suggestionBox.classList.remove('hidden');
-            } else {
-                suggestionBox.classList.add('hidden');
-            }
+            } else { suggestionBox.classList.add('hidden'); }
         });
 
         document.addEventListener('click', (e) => {
@@ -228,8 +216,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                 (r.teacher && r.teacher.toLowerCase().includes(searchTerm))
             ).sort((a, b) => {
                 const dateA = new Date(a.makeUpDate), dateB = new Date(b.makeUpDate);
-                if (dateA - dateB !== 0) return dateA - dateB;
-                return a.name.localeCompare(b.name);
+                return dateA - dateB || a.name.localeCompare(b.name);
             });
 
             filtered.forEach(record => {
@@ -257,6 +244,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                     <div class="space-y-2 text-sm text-slate-600 mb-6">
                         <div class="flex items-center gap-2 font-medium text-slate-800"><i data-lucide="clipboard-list" class="w-4 h-4 text-slate-400"></i> ${record.examName}</div>
                         <div class="flex items-center gap-2 ${isOverdue ? 'text-red-600 font-bold' : ''}"><i data-lucide="calendar" class="w-4 h-4 ${isOverdue ? 'text-red-500' : 'text-slate-400'}"></i> ${dateObj.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' })} Uhr</div>
+                        ${record.comment ? `<div class="mt-2 p-2 bg-amber-50 rounded-lg text-xs text-amber-800 border border-amber-100 italic"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i> ${record.comment}</div>` : ''}
                     </div>
                     <div class="flex gap-2 pt-4 border-t border-slate-50">
                         <button onclick="sendInvitationMail('${record.id}')" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-100 flex items-center justify-center gap-2 transition"><i data-lucide="send" class="w-3 h-3"></i> Einladung</button>
@@ -267,7 +255,6 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                 `;
                 grid.appendChild(card);
             });
-
             document.getElementById('statsPending').innerText = pendingCount;
             document.getElementById('statsOverdue').innerText = overdueCount;
             document.getElementById('badgeOverdue').classList.toggle('hidden', overdueCount === 0);
@@ -284,6 +271,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                 email: document.getElementById('inputEmail').value,
                 examName: document.getElementById('inputExam').value,
                 makeUpDate: document.getElementById('inputDate').value,
+                comment: document.getElementById('inputComment').value, // BEMERKUNG SPEICHERN
                 hasAU: document.getElementById('inputAU').checked,
             };
             if (editingId) { records = records.map(r => r.id === editingId ? {...r, ...data} : r); cancelEdit(); }
@@ -298,6 +286,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
             document.getElementById('inputClass').value = r.schoolClass; document.getElementById('inputDuration').value = r.duration || '';
             document.getElementById('inputEmail').value = r.email || ''; document.getElementById('inputExam').value = r.examName;
             document.getElementById('inputDate').value = r.makeUpDate; document.getElementById('inputAU').checked = r.hasAU;
+            document.getElementById('inputComment').value = r.comment || ''; // BEMERKUNG LADEN
             document.getElementById('formTitle').innerText = "Bearbeiten"; document.getElementById('submitBtn').innerText = "Speichern";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
         };
@@ -305,14 +294,10 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
 
         window.exportToPDF = function() {
             const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
-            const sortedRecords = [...records].sort((a, b) => {
-                const dateA = new Date(a.makeUpDate), dateB = new Date(b.makeUpDate);
-                if (dateA - dateB !== 0) return dateA - dateB;
-                return a.name.localeCompare(b.name);
-            });
-            const tableRows = sortedRecords.map(r => [new Date(r.makeUpDate).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }), r.name, r.schoolClass, r.teacher || '-', r.examName, r.hasAU ? 'Ja' : 'Nein', r.registered ? 'Ja' : 'Nein', r.status === 'completed' ? 'Erledigt' : 'Ausstehend']);
+            const sortedRecords = [...records].sort((a, b) => new Date(a.makeUpDate) - new Date(b.makeUpDate) || a.name.localeCompare(b.name));
+            const tableRows = sortedRecords.map(r => [new Date(r.makeUpDate).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }), r.name, r.schoolClass, r.teacher || '-', r.examName, r.comment || '-', r.hasAU ? 'Ja' : 'Nein', r.status === 'completed' ? 'Erledigt' : 'Offen']);
             doc.text("Nachschreibetermine Übersicht", 14, 15);
-            doc.autoTable({ startY: 28, head: [['Termin', 'Schüler', 'Klasse', 'Kürzel', 'Leistung', 'AU', 'Zentral', 'Status']], body: tableRows, theme: 'striped', headStyles: { fillColor: [37, 99, 235] }, styles: { fontSize: 9 } });
+            doc.autoTable({ startY: 28, head: [['Termin', 'Schüler', 'Klasse', 'Kürzel', 'Leistung', 'Bemerkung', 'AU', 'Status']], body: tableRows, theme: 'striped', headStyles: { fillColor: [37, 99, 235] }, styles: { fontSize: 8 } });
             doc.save(`nachschreiber_liste_${new Date().toISOString().split('T')[0]}.pdf`);
         };
 
