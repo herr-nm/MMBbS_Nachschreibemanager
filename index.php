@@ -139,8 +139,13 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
         <div class="max-w-6xl mx-auto border-t border-slate-200 pt-6 px-4 text-center">
             <p class="mb-2">Nachschreibe-Manager &copy; 2026 by Herr-NM</p>
             <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
-                <span class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded font-mono text-xs">CC BY-NC-SA 4.0</span>
-                <p>Der ursprüngliche Code steht unter <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.de" target="_blank" class="underline hover:text-blue-600">CC BY-NC 4.0</a>, Urheber: Herr-FR.</p>
+                <span class="bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded font-mono text-xs font-semibold">
+                    GNU AGPLv3
+                </span>
+                <p>
+                    Lizenziert unter <a href="https://www.gnu.org/licenses/agpl-3.0.de.html" target="_blank" class="underline hover:text-blue-600">AGPL-3.0</a>. 
+                    Ursprünglicher Code von <a href="#" class="hover:text-slate-700">Herr-FR</a> (unter CC BY-NC 4.0).
+                </p>
             </div>
         </div>
     </footer>
