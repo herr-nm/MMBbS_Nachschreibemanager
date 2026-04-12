@@ -70,6 +70,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
     <style>
         .suggestion-item:hover { background-color: #f1f5f9; cursor: pointer; }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 font-sans">
     <div class="p-4 md:p-8">
@@ -138,14 +139,22 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
     <footer class="mt-12 pb-8 text-center text-slate-500 text-sm">
         <div class="max-w-6xl mx-auto border-t border-slate-200 pt-6 px-4 text-center">
             <p class="mb-2">Nachschreibe-Manager &copy; 2026 by Herr-NM</p>
-            <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
+            
+            <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 mb-4">
                 <span class="bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded font-mono text-xs font-semibold">
                     GNU AGPLv3
                 </span>
                 <p>
                     Lizenziert unter <a href="https://www.gnu.org/licenses/agpl-3.0.de.html" target="_blank" class="underline hover:text-blue-600">AGPL-3.0</a>. 
-                    Ursprünglicher Code von <a href="#" class="hover:text-slate-700">Herr-FR</a> (unter CC BY-NC 4.0).
+                    Ursprünglicher Code von Herr-FR (unter CC BY-NC 4.0).
                 </p>
+            </div>
+
+            <div class="flex items-center justify-center gap-2">
+                <a href="https://github.com/herr-nm/MMBbS_Nachschreibemanager" target="_blank" class="flex items-center gap-2 text-slate-600 hover:text-black transition-colors">
+                    <i class="fab fa-github text-lg"></i>
+                    <span class="font-medium">Quellcode auf GitHub</span>
+                </a>
             </div>
         </div>
     </footer>
