@@ -63,9 +63,14 @@ Das Tool erwartet im Ordner `klassen/` Dateien mit der typischen Moodle-Teilnehm
 
 ## ⚖️ Lizenz & Urheberrecht
 
-Der **Nachschreibe-Manager** ist unter der Lizenz **CC BY-NC-SA 4.0** (Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter gleichen Bedingungen) lizenziert.
+Der Nachschreibe-Manager ist unter der GNU Affero General Public License v3.0 (AGPL-3.0) lizenziert.
 
-* **Urheber des Originals:** Herr-FR (Lizenz: CC BY-NC 4.0)
-* **Änderungen & Erweiterungen:** Herr-NM (Lizenz: CC BY-NC-SA 4.0)
+- Urheber des Originals: Herr-FR (ursprünglich lizenziert unter CC BY-NC 4.0)
+- Änderungen & Erweiterungen: Copyright © 2026 Herr-NM
+- Lizenz der Erweiterungen: GNU AGPLv3
 
-Der vollständige Lizenztext findet sich in der Datei `LICENSE` oder unter [Creative Commons](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de).
+**Wichtiger Hinweis zur kombinierten Lizenzierung:**
+
+Da das Projekt auf Code basiert, der unter der „Non-Commercial“ Einschränkung (CC BY-NC 4.0) steht, bleibt die Nutzung des Gesamtwerks trotz der AGPL-Lizenzierung für den neuen Code faktisch auf nicht-kommerzielle Zwecke beschränkt.
+
+Der vollständige Lizenztext findet sich in der Datei LICENSE oder unter https://www.gnu.org/licenses/agpl-3.0.de.html.
