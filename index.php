@@ -90,9 +90,11 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
         .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
         h3 { margin: 0 0 15px 0; font-size: 0.85rem; color: var(--primary-blue); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #f3f4f6; padding-bottom: 10px; font-weight: 700; }
         
+        /* Footer */
         footer { background-color: #14508c; color: white; padding: 40px 0; margin-top: 60px; }
         .footer-content { max-width: 1320px; margin: 0 auto; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; }
-        .footer-link { color: #89b1d8; text-decoration: none; }
+        .footer-link { color: #89b1d8; text-decoration: none; transition: color 0.2s; }
+        .footer-link:hover { color: white; }
 
         .suggestion-item:hover { background-color: #f1f5f9; cursor: pointer; }
         .tab-active { border-bottom: 3px solid var(--primary-blue); color: var(--primary-blue); }
@@ -199,7 +201,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
     <div class="footer-content">
         <div>
             <h4 style="margin:0 0 10px 0;">Lizenz</h4>
-            © <?= date('Y') ?> MMBbS Hannover | <a href="https://github.com/herr-nm/MMBbS_Nachschreibemanager" target="_blank" class="footer-link">Herr-NM</a> | <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" class="footer-link">GNU AGPL v3</a>
+            © <?= date('Y') ?> MMBbS Hannover | <a href="https://github.com/herr-nm/MMBbS_Didaktischer_Jahresplan" target="_blank" class="footer-link">Neumann</a> | <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" class="footer-link">GNU AGPL v3</a><br><a href="https://github.com/Herr-FR/Nachschreibermanager" target="_blank" class="footer-link">Ursprünglicher Code von Herr-FR (unter CC BY-NC 4.0)</a>
         </div>
         <div style="text-align: right;">
             <h4 style="margin:0 0 10px 0;">Kontakt</h4>
