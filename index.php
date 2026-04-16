@@ -97,6 +97,10 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
         .suggestion-item:hover { background-color: #f1f5f9; cursor: pointer; }
         .tab-active { border-bottom: 3px solid var(--primary-blue); color: var(--primary-blue); }
         .action-btn-toggle { transition: all 0.2s; border: 1px solid #e2e8f0; }
+        
+        /* Sortier-Header Style */
+        .sortable-header { cursor: pointer; transition: background 0.2s; }
+        .sortable-header:hover { background-color: #f8fafc; }
     </style>
 </head>
 <body>
@@ -140,7 +144,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                     </div>
                     
                     <button type="submit" id="submitBtn" class="nav-btn nav-btn-blue w-full !py-3">Speichern</button>
-                    <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-full text-slate-500 text-xs py-2 uppercase font-bold tracking-wider">Abbrechen</button>
+                    <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden w-full text-slate-500 text-xs py-2 uppercase font-bold tracking-wider text-center">Abbrechen</button>
                 </form>
             </div>
         </div>
@@ -176,10 +180,10 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50 border-b border-slate-100">
                             <tr>
-                                <th class="p-4 text-xs font-bold text-slate-500 uppercase">Termin</th>
-                                <th class="p-4 text-xs font-bold text-slate-500 uppercase">Schüler / Klasse</th>
-                                <th class="p-4 text-xs font-bold text-slate-500 uppercase text-center">Inv / Reg / AU</th>
-                                <th class="p-4 text-xs font-bold text-slate-500 uppercase">Leistung</th>
+                                <th onclick="setSort('makeUpDate')" class="sortable-header p-4 text-xs font-bold text-slate-500 uppercase">Termin <i data-lucide="chevrons-up-down" class="inline w-3 h-3 ml-1"></i></th>
+                                <th onclick="setSort('name')" class="sortable-header p-4 text-xs font-bold text-slate-500 uppercase">Schüler <i data-lucide="chevrons-up-down" class="inline w-3 h-3 ml-1"></i></th>
+                                <th onclick="setSort('schoolClass')" class="sortable-header p-4 text-xs font-bold text-slate-500 uppercase">Klasse <i data-lucide="chevrons-up-down" class="inline w-3 h-3 ml-1"></i></th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase text-center">Status</th>
                                 <th class="p-4 text-xs font-bold text-slate-500 uppercase text-right">Aktionen</th>
                             </tr>
                         </thead>
@@ -211,6 +215,20 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
     let editingId = null;
     let currentView = 'grid'; 
     let currentStatusFilter = 'pending';
+    
+    // Sortier-Zustand
+    let sortField = 'makeUpDate';
+    let sortOrder = 1; // 1 = ASC, -1 = DESC
+
+    function setSort(field) {
+        if (sortField === field) {
+            sortOrder *= -1;
+        } else {
+            sortField = field;
+            sortOrder = 1;
+        }
+        render();
+    }
 
     // --- RENDER FUNKTION ---
     function render() {
@@ -227,17 +245,35 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                 pendingCount++;
                 if (new Date(r.makeUpDate) < now) overdueCount++;
             }
-            const matchesSearch = r.name.toLowerCase().includes(searchTerm) || r.schoolClass.toLowerCase().includes(searchTerm) || r.examName.toLowerCase().includes(searchTerm);
-            const matchesStatus = currentStatusFilter === 'all' || r.status === currentStatusFilter;
-            return matchesSearch && matchesStatus;
-        }).sort((a, b) => new Date(a.makeUpDate) - new Date(b.makeUpDate));
+            return r.name.toLowerCase().includes(searchTerm) || 
+                   r.schoolClass.toLowerCase().includes(searchTerm) || 
+                   r.examName.toLowerCase().includes(searchTerm);
+        })
+        .filter(r => currentStatusFilter === 'all' || r.status === currentStatusFilter)
+        .sort((a, b) => {
+            let valA = a[sortField] || '';
+            let valB = b[sortField] || '';
+            
+            // Sonderbehandlung für Datum
+            if (sortField === 'makeUpDate') {
+                valA = new Date(valA);
+                valB = new Date(valB);
+            } else {
+                valA = valA.toString().toLowerCase();
+                valB = valB.toString().toLowerCase();
+            }
+
+            if (valA < valB) return -1 * sortOrder;
+            if (valA > valB) return 1 * sortOrder;
+            return 0;
+        });
 
         filtered.forEach(record => {
             const dateObj = new Date(record.makeUpDate);
             const isOverdue = dateObj < now && record.status === 'pending';
             const formattedDate = dateObj.toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' });
 
-            // GRID CARD
+            // GRID CARD (Aktionen wie zuvor)
             const card = document.createElement('div');
             card.className = `bg-white p-5 rounded-xl shadow-sm border-2 transition-all ${record.status === 'completed' ? 'opacity-75 grayscale border-slate-100' : isOverdue ? 'border-red-200 bg-red-50/20' : 'border-slate-50'}`;
             card.innerHTML = `
@@ -261,7 +297,7 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                     ${record.comment ? `<div class="text-xs italic text-slate-400 bg-slate-50 p-2 rounded border-l-2 border-slate-200">${record.comment}</div>` : ''}
                 </div>
                 <div class="flex gap-2 pt-4 border-t border-slate-100">
-                    <button onclick="sendInvitationMail('${record.id}')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[11px] font-bold uppercase tracking-tighter transition">Mail Senden</button>
+                    <button onclick="sendInvitationMail('${record.id}')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-[11px] font-bold uppercase tracking-tighter transition">Mail</button>
                     <button onclick="toggleStatus('${record.id}')" class="flex-1 py-2 rounded text-[11px] font-bold uppercase transition ${record.status === 'completed' ? 'bg-slate-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}">${record.status === 'completed' ? 'Reaktivieren' : '✔ Erledigt'}</button>
                     <button onclick="editRecord('${record.id}')" class="p-2 text-amber-600 hover:bg-amber-50 rounded transition"><i data-lucide="pencil" class="w-4 h-4"></i></button>
                     <button onclick="deleteRecord('${record.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -274,7 +310,8 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
             tr.className = `border-b border-slate-100 text-sm hover:bg-slate-50/50 ${record.status === 'completed' ? 'opacity-50' : ''}`;
             tr.innerHTML = `
                 <td class="p-4 ${isOverdue ? 'text-red-600 font-bold' : ''}">${formattedDate}</td>
-                <td class="p-4"><div class="font-bold">${record.name}</div><div class="text-[10px] text-slate-400">${record.schoolClass}</div></td>
+                <td class="p-4 font-bold">${record.name}</td>
+                <td class="p-4">${record.schoolClass}</td>
                 <td class="p-4 text-center">
                     <div class="flex justify-center gap-2">
                         <i data-lucide="mail" class="w-4 h-4 ${record.invited ? 'text-blue-500' : 'text-slate-200'}"></i>
@@ -282,7 +319,6 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
                         <span class="text-[10px] font-bold ${record.hasAU ? 'text-emerald-500' : 'text-red-400'}">AU</span>
                     </div>
                 </td>
-                <td class="p-4 font-medium">${record.examName}</td>
                 <td class="p-4 text-right">
                     <div class="flex justify-end gap-1">
                         <button onclick="toggleStatus('${record.id}')" class="p-2 rounded hover:bg-emerald-50 ${record.status === 'completed' ? 'text-emerald-600' : 'text-slate-300'}"><i data-lucide="check-circle" class="w-5 h-5"></i></button>
@@ -324,13 +360,11 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
         const dateStr = new Date(r.makeUpDate).toLocaleDateString('de-DE');
         const timeStr = new Date(r.makeUpDate).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         const subject = encodeURIComponent(`Einladung zum Nachschreibetermin - ${r.examName}`);
-        const body = encodeURIComponent(`Hallo ${r.name},\n\nSie haben zu meiner Klassenarbeit im Fach ${r.examName} gefehlt.\nIhr Nachschreibetermin findet am ${dateStr} um ${timeStr} statt.\n\nBitte bestätigen Sie mir diese Mail.`);
+        const body = encodeURIComponent(`Hallo ${r.name},\n\nIhr Nachschreibetermin findet am ${dateStr} um ${timeStr} statt.\n\nBitte bestätigen Sie mir diese Mail.`);
         window.location.href = `mailto:${r.email}?subject=${subject}&body=${body}`;
         records = records.map(rec => rec.id === id ? {...rec, invited: true} : rec);
         render(); await saveToServer();
     };
-
-    // --- FORMULAR LOGIK ---
 
     document.getElementById('addForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -374,14 +408,11 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
     };
 
     window.cancelEdit = () => { 
-        editingId = null; 
-        document.getElementById('addForm').reset(); 
+        editingId = null; document.getElementById('addForm').reset(); 
         document.getElementById('formTitle').innerText = "Neuer Eintrag"; 
         document.getElementById('submitBtn').innerText = "Speichern";
         document.getElementById('cancelEditBtn').classList.add('hidden'); 
     };
-
-    // --- UI HELPER ---
 
     function setStatusFilter(status) {
         currentStatusFilter = status;
@@ -404,9 +435,9 @@ $currentData = file_exists($storageFile) ? file_get_contents($storageFile) : '[]
         const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
         const rows = records.filter(r => currentStatusFilter === 'all' || r.status === currentStatusFilter)
                             .map(r => [new Date(r.makeUpDate).toLocaleString('de-DE'), r.name, r.schoolClass, r.examName, r.status === 'completed' ? 'Erledigt' : 'Offen']);
-        doc.setFontSize(18); doc.text("Nachschreibetermine - MMBbS", 14, 15);
-        doc.autoTable({ startY: 20, head: [['Termin', 'Name', 'Klasse', 'Leistung', 'Status']], body: rows, headStyles: { fillColor: [20, 80, 140] } });
-        doc.save('Nachschreiber_Liste.pdf');
+        doc.text("Nachschreibetermine - MMBbS", 14, 15);
+        doc.autoTable({ startY: 20, head: [['Termin', 'Name', 'Klasse', 'Leistung', 'Status']], body: rows });
+        doc.save('Nachschreiber.pdf');
     };
 
     // Autocomplete
